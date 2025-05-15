@@ -1,0 +1,525 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Ordem de Comando</title>
+  <style>
+    /* ===== Global ===== */
+    body {
+      margin: 0;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background-image: url('111.png');
+      background-size: cover;
+      background-position: center;
+      background-repeat: no-repeat;
+      background-attachment: fixed;
+      color: #000;
+      font-size: 14px;
+      transition: background 0.3s;
+    }
+  
+    .container {
+      padding: 1.5rem;
+      background-color: rgba(255,255,255,0.95);
+      border-radius: 12px;
+      max-width: 1200px;
+      margin: 2rem auto;
+      box-shadow: 0 4px 30px rgba(0,0,0,0.1);
+      transition: background-color 0.3s;
+    }
+    .container:hover {
+      background-color: rgba(255,255,255,1);
+    }
+  
+    /* ===== Sections & Layout ===== */
+    .section {
+      border-bottom: 1px solid #e0e0e0;
+      padding: 1rem 0;
+      margin-bottom: 1rem;
+    }
+    .top-row,
+    .bottom-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 1rem;
+    }
+  
+    /* ===== Month Buttons ===== */
+    .month-buttons {
+      display: grid;
+      grid-template-columns: repeat(6, auto);
+      gap: 0.5rem;
+    }
+    .month-btn {
+      border: 1px solid #555;
+      border-radius: 999px;
+      padding: 0.5rem 1rem;
+      background-color: #fff;
+      cursor: pointer;
+      font-size: 0.95rem;
+      transition: background-color 0.2s, border-color 0.2s;
+    }
+    .month-btn:hover {
+      background-color: #f0f8ff;
+      border-color: #99c9ff;
+    }
+    .month-btn.selected {
+      background-color: #cce4ff;
+      border-color: #99c9ff;
+      color: #000;
+    }
+  
+    /* ===== Control & Action Buttons ===== */
+    .controls {
+    display: flex;
+    flex-direction: column;  /* força empilhar vertical */
+    gap: 0.5rem;             /* deixa um bom espaçamento entre eles */
+    border-radius: 999px;
+    padding: 0.2rem 1.2rem;
+  }
+  .control-btn {
+  border-radius: 999px !important;
+  }
+    .toggle-section {
+    margin-top: 0,3rem;   
+      }
+    .action-btn {
+      border: 1px solid #555;
+      border-radius: 999px;
+      background-color: #fafafa;
+      cursor: pointer;
+      transition: background-color 0.2s, border-color 0.2s;
+    }
+    .control-btn,
+    .toggle-btn {
+      padding: 0.4rem 1.2rem;
+      font-size: 0.9rem;
+    }
+    .action-btn {
+      padding: 0.7rem 1.8rem;
+      font-size: 1rem;
+    }
+    .control-btn:hover,
+    .toggle-btn:hover,
+    .action-btn:hover,
+    .search-btn:hover {
+      background-color: #f0f8ff;
+      border-color: #99c9ff;
+    }
+    .toggle-btn.active,
+    .action-btn.active {
+      background-color: #cce4ff;
+      border-color: #99c9ff;
+    }
+  
+    /* ===== Input ===== */
+    .input-box {
+      flex-grow: 1;
+      border: 1px solid #ccc;
+      border-radius: 6px;
+      padding: 0.6rem;
+      font-size: 1rem;
+      background: #fff;
+      outline: none;
+      transition: border-color 0.2s;
+    }
+    .input-box:focus {
+      border-color: #99c9ff;
+    }
+  
+    .search-btn {
+      font-size: 1.5rem;
+      background: none;
+      border: none;
+      cursor: pointer;
+      transition: transform 0.2s;
+    }
+    .search-btn:hover {
+      transform: scale(1.1);
+    }
+  
+    /* ===== Table ===== */
+    .section.table-container {
+    padding-top: 0;      /* remove o espaçamento criado por .section */
+    margin-top: 0;       /* elimina qualquer margem acima */
+  }
+    .table-container {
+      max-height: 400px;
+      overflow-y: auto;
+      border: 1px solid #ccc;
+      border-radius: 8px;
+      top: 0;         
+
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 0.9rem;
+    }
+    th,
+    td {
+      padding: 0.75rem 1rem;
+      text-align: left;
+      transition: background-color 0.2s;
+    }
+    tr:hover td {
+      background-color: rgba(0,0,0,0.05);
+    }
+    th {
+      background: #f5f5f5;
+      position: sticky;
+      top: 0;
+      z-index: 1;
+    }
+  
+    /* ===== Modal ===== */
+    .modal-backdrop {
+      content: '';
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0,0,0,0.4);
+      z-index: 998;
+      opacity: 0;
+      transition: opacity 0.3s;
+    }
+    .modal-backdrop.show {
+      opacity: 1;
+    }
+    .modal {
+      display: none;
+      position: fixed;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%) scale(0.9);
+      background: #fff;
+      border-radius: 12px;
+      padding: 2rem;
+      box-shadow: 0 8px 24px rgba(0,0,0,0.2);
+      z-index: 999;
+      width: 320px;
+      max-width: 90%;
+      transition: transform 0.3s;
+    }
+    .modal.show {
+      display: block;
+      transform: translate(-50%, -50%) scale(1);
+    }
+    .modal-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .modal-header h2 {
+      margin: 0;
+      font-size: 1.2rem;
+    }
+    .close-btn {
+      background: none;
+      border: none;
+      font-size: 1.2rem;
+      cursor: pointer;
+      transition: transform 0.2s;
+    }
+    .close-btn:hover {
+      transform: rotate(90deg);
+    }
+    .modal-content {
+      margin-top: 1rem;
+    }
+    .modal-section {
+      margin-bottom: 1rem;
+    }
+    .modal-section label {
+      font-weight: 600;
+      font-size: 0.95rem;
+    }
+    .radio-group {
+      margin-top: 0.5rem;
+      display: flex;
+      flex-direction: column;
+      gap: 0.5rem;
+    }
+    .radio-group input {
+      margin-right: 0.5rem;
+    }
+    .modal-footer {
+      display: flex;
+      justify-content: space-between;
+      margin-top: 1.5rem;
+    }
+  </style>
+
+</head>
+<body>
+  <div class="container">
+    <!-- Parte superior -->
+    <div class="section">
+      <div class="top-row">
+        <!-- Meses -->
+        <div class="month-buttons" id="months">
+          <button class="month-btn" data-index="0">Jan</button>
+          <button class="month-btn" data-index="1">Fev</button>
+          <button class="month-btn" data-index="2">Mar</button>
+          <button class="month-btn" data-index="3">Abr</button>
+          <button class="month-btn" data-index="4">Mai</button>
+          <button class="month-btn" data-index="5">Jun</button>
+          <button class="month-btn" data-index="6">Jul</button>
+          <button class="month-btn" data-index="7">Ago</button>
+          <button class="month-btn" data-index="8">Set</button>
+          <button class="month-btn" data-index="9">Out</button>
+          <button class="month-btn" data-index="10">Nov</button>
+          <button class="month-btn" data-index="11">Dez</button>
+        </div>
+
+        <!-- Botões de controle -->
+        <div class="controls">
+          <button class="control-btn" onclick="selecionarTodos()">✅ Todos</button>
+          <button class="control-btn" onclick="selecionarDisponiveis()">🕓 Até agora</button>
+          <button class="control-btn" onclick="removerSelecao()">❌ Nenhum</button>
+        </div>
+      </div>
+
+      <!-- Alternância FOLHA / G5 -->
+      <div class="toggle-section">
+        <button class="toggle-btn" id="btnFolha" onclick="alternar('folha')"> FOLHA</button>
+        <button class="toggle-btn" id="btnG5" onclick="alternar('g5')"> G5</button>
+      </div>
+    </div>
+
+    <!-- Parte inferior atualizada -->
+    <div class="section">
+      <div class="bottom-row">
+        <div class="label">Selecionadas</div>
+        <button class="action-btn" id="btnOk" onclick="selecionarEstado('ok')">✔️</button>
+        <button class="action-btn" id="btnNo" onclick="selecionarEstado('no')">❌</button>
+        <input type="text" class="input-box" placeholder="Digite aqui...">
+        <button class="search-btn" onclick="abrirModal()">🔍</button>
+      </div>
+    </div>
+
+    <!-- Tabela de Empresas -->
+    <div class="section table-container">
+      <table>
+        <thead>
+          <tr>
+            <th>SELEÇÃO</th>
+            <th>APELIDO</th>
+            <th>RAZÃO</th>
+            <th>CNPJ</th>
+            <th>TRIB</th>
+            <th>SITUAÇÃO</th>
+          </tr>
+        </thead>
+        <tbody id="tabelaEmpresas">
+          <!-- Linhas dinâmicas virão aqui -->
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+
+
+
+  <div class="modal" id="janelaBusca">
+    <div class="modal-header">
+      <h2>🔍 Filtros Avançados</h2>
+      <button class="close-btn" onclick="fecharModal()">✖️</button>
+    </div>
+    <div class="modal-content">
+      <div class="modal-section">
+        <label>Tributação:</label>
+        <div class="radio-group">
+          <label><input type="radio" name="filtroTrib" value="Simples"> Simples</label>
+          <label><input type="radio" name="filtroTrib" value="Lucro"> Lucro</label>
+        </div>
+      </div>
+      <div class="modal-section">
+        <label>Situação:</label>
+        <div class="radio-group">
+          <label><input type="radio" name="filtroSituacaoExtra" value="feito"> Feito</label>
+          <label><input type="radio" name="filtroSituacaoExtra" value="quase feito"> Quase Feito</label>
+          <label><input type="radio" name="filtroSituacaoExtra" value="não feito"> Não Feito</label>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="action-btn" onclick="limparFiltros()">Limpar Filtros</button>
+        <button class="action-btn" onclick="aplicarFiltros(); fecharModal()">Aplicar</button>
+      </div>
+    </div>
+  </div>
+
+  </div>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+ 
+
+<script>
+  const monthButtons = document.querySelectorAll('.month-btn');
+  const tabelaEmpresas = document.getElementById('tabelaEmpresas');
+  let dadosEmpresas = [];
+  let filtroSituacao = null;
+  let filtroTexto = '';
+
+  monthButtons.forEach(btn =>
+    btn.addEventListener('click', () => btn.classList.toggle('selected'))
+  );
+
+  function selecionarTodos() {
+    monthButtons.forEach(btn => btn.classList.add('selected'));
+  }
+
+  function selecionarDisponiveis() {
+    const mesAtual = new Date().getMonth();
+    monthButtons.forEach((btn, i) =>
+      i < mesAtual ? btn.classList.add('selected') : btn.classList.remove('selected')
+    );
+  }
+
+  function removerSelecao() {
+    monthButtons.forEach(btn => btn.classList.remove('selected'));
+  }
+
+  function alternar(tipo) {
+    const btn = document.getElementById(tipo === 'folha' ? 'btnFolha' : 'btnG5');
+    btn.classList.toggle('active');
+  }
+
+  function selecionarEstado(tipo) {
+    const btnOk = document.getElementById('btnOk');
+    const btnNo = document.getElementById('btnNo');
+    if (tipo === 'ok') {
+      const sel = !btnOk.classList.contains('active');
+      btnOk.classList.toggle('active', sel);
+      btnNo.classList.remove('active');
+      filtroSituacao = sel ? 'ok' : null;
+    } else {
+      const sel = !btnNo.classList.contains('active');
+      btnNo.classList.toggle('active', sel);
+      btnOk.classList.remove('active');
+      filtroSituacao = sel ? 'no' : null;
+    }
+    aplicarFiltros();
+  }
+
+  function abrirModal() {
+    document.getElementById('modalBackdrop')?.classList.add('show');
+    document.getElementById('janelaBusca')?.classList.add('show');
+  }
+
+  function fecharModal() {
+    document.getElementById('modalBackdrop')?.classList.remove('show');
+    document.getElementById('janelaBusca')?.classList.remove('show');
+  }
+
+  function limparFiltros() {
+    document.querySelectorAll('input[name="filtroTrib"]').forEach(r => r.checked = false);
+    document.querySelectorAll('input[name="filtroSituacaoExtra"]').forEach(r => r.checked = false);
+    filtroSituacao = null;
+    filtroTexto = '';
+    document.querySelector('.input-box').value = '';
+    aplicarFiltros();
+  }
+
+  document.querySelector('.input-box').addEventListener('input', e => {
+    filtroTexto = e.target.value.trim().toLowerCase();
+    aplicarFiltros();
+  });
+
+  function aplicarFiltros() {
+    let lista = [...dadosEmpresas];
+
+    if (filtroSituacao === 'ok')       lista = lista.filter(e => e.selecionado);
+    else if (filtroSituacao === 'no')  lista = lista.filter(e => !e.selecionado);
+
+    if (filtroTexto) {
+      lista = lista.filter(e => {
+        const t = filtroTexto;
+        return (
+          e.apelido.toLowerCase().includes(t) ||
+          e.razao.toLowerCase().includes(t) ||
+          e.cnpj.toLowerCase().includes(t)
+        );
+      });
+    }
+
+    const trib = document.querySelector('input[name="filtroTrib"]:checked')?.value;
+    if (trib === 'Simples')      lista = lista.filter(e => e.trib === 'Simples');
+    else if (trib === 'Lucro')   lista = lista.filter(e => e.trib !== 'Simples');
+
+    const sit = document.querySelector('input[name="filtroSituacaoExtra"]:checked')?.value;
+    if (sit) lista = lista.filter(e => (e.situacao || '').toLowerCase() === sit);
+
+    renderizarTabela(lista);
+  }
+
+  function renderizarTabela(lista) {
+    tabelaEmpresas.innerHTML = '';
+    lista.forEach(emp => {
+      const idx = dadosEmpresas.findIndex(e => e.cnpj === emp.cnpj);
+      const row = document.createElement('tr');
+      row.innerHTML = `
+        <td><input type="checkbox" data-index="${idx}" ${emp.selecionado ? 'checked' : ''}></td>
+        <td>${emp.apelido}</td>
+        <td>${emp.razao}</td>
+        <td>${emp.cnpj}</td>
+        <td>${emp.trib}</td>
+        <td>${emp.situacao || ''}</td>
+      `;
+      tabelaEmpresas.appendChild(row);
+    });
+
+    document.querySelectorAll('input[type="checkbox"]').forEach(chk => {
+      chk.addEventListener('change', e => {
+        const i = +e.target.dataset.index;
+        dadosEmpresas[i].selecionado = e.target.checked;
+        aplicarFiltros();
+      });
+    });
+  }
+
+  fetch('empresas.json')
+    .then(r => r.json())
+    .then(emp => {
+      dadosEmpresas = emp.map(e => ({ ...e, selecionado: false }));
+      aplicarFiltros();
+    });
+</script>
+
+  
+
+
+
+
+
+
+
+
+  
+  
+
+
+
+  
+</body>
+</html>

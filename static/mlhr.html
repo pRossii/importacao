@@ -1,0 +1,474 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Ordem de Comando</title>
+  <style>
+    body {
+      margin: 0;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background-image: url('111.png');
+      background-size: cover;
+      background-position: center;
+      background-repeat: no-repeat;
+      background-attachment: fixed;
+      color: #000;
+      font-size: 14px;
+    }
+
+    .container {
+      padding: 1rem;
+      background-color: rgba(255, 255, 255, 0.94);
+      border-radius: 12px;
+      max-width: 1200px;
+      margin: 2rem auto;
+      box-shadow: 0 0 20px rgba(0, 0, 0, 0.15);
+    }
+
+    .section {
+      border-bottom: 1px solid #ddd;
+      padding-bottom: 1rem;
+      margin-bottom: 1rem;
+    }
+
+    .top-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: start;
+      flex-wrap: wrap;
+      gap: 1rem;
+    }
+
+    .month-buttons {
+      display: grid;
+      grid-template-columns: repeat(6, auto);
+      gap: 0.4rem;
+    }
+
+    .month-btn {
+      border: 1px solid #000;
+      border-radius: 999px;
+      padding: 0.45rem 0.9rem;
+      background-color: white;
+      cursor: pointer;
+      font-size: 0.95rem;
+      transition: all 0.2s ease;
+    }
+
+    .month-btn.selected {
+      background-color: #d0e7ff;
+      color: #000;
+      border-color: #99c9ff;
+    }
+
+    .controls {
+      display: flex;
+      flex-direction: column;
+      gap: 0.3rem;
+    }
+
+    .control-btn {
+      border: 1px solid #000;
+      border-radius: 999px;
+      padding: 0.3rem 0.8rem;
+      background-color: white;
+      cursor: pointer;
+      font-size: 0.85rem;
+      display: flex;
+      align-items: center;
+      gap: 0.4rem;
+      transition: background-color 0.2s;
+    }
+
+    .control-btn:hover,
+    .toggle-btn:hover,
+    .action-btn:hover,
+    .search-btn:hover {
+      background-color: #f0f8ff;
+    }
+
+    .toggle-section {
+      display: flex;
+      gap: 0.5rem;
+      margin-top: 0.5rem;
+    }
+
+    .toggle-btn {
+      padding: 0.3rem 1rem;
+      border-radius: 999px;
+      border: 1px solid #000;
+      background-color: white;
+      cursor: pointer;
+      font-size: 0.85rem;
+    }
+
+    .toggle-btn.active {
+      background-color: #d0e7ff;
+      color: #000;
+      border-color: #99c9ff;
+    }
+
+    .bottom-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 1rem;
+      flex-wrap: wrap;
+    }
+
+    .label {
+      font-weight: 500;
+    }
+
+    .action-btn {
+      padding: 0.6rem 1.5rem;
+      font-size: 1rem;
+      border-radius: 999px;
+      border: 1px solid #000;
+      background-color: white;
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+
+    .action-btn.active {
+      background-color: #d0e7ff;
+      border-color: #99c9ff;
+    }
+
+    .input-box {
+      flex-grow: 1;
+      border: none;
+      border-bottom: 1px solid #aaa;
+      padding: 0.5rem;
+      font-size: 1rem;
+      background: transparent;
+      outline: none;
+    }
+
+    .search-btn {
+      font-size: 1.5rem;
+      background: none;
+      border: none;
+      cursor: pointer;
+    }
+
+    .modal {
+      display: none;
+      position: fixed;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      background: white;
+      border: 1px solid #ccc;
+      border-radius: 10px;
+      padding: 2rem;
+      box-shadow: 0 0 20px rgba(0,0,0,0.2);
+      z-index: 999;
+    }
+
+    .modal.show {
+      display: block;
+    }
+
+    .table-container {
+      max-height: 400px;
+      overflow-y: auto;
+      border: 1px solid #ccc;
+      border-radius: 8px;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 0.9rem;
+    }
+
+    th, td {
+      border-bottom: 1px solid #eee;
+      padding: 0.6rem 0.8rem;
+      text-align: left;
+    }
+
+    th {
+      background-color: #f5f5f5;
+      position: sticky;
+      top: 0;
+      z-index: 1;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <!-- Parte superior -->
+    <div class="section">
+      <div class="top-row">
+        <!-- Meses -->
+        <div class="month-buttons" id="months">
+          <button class="month-btn" data-index="0">Jan</button>
+          <button class="month-btn" data-index="1">Fev</button>
+          <button class="month-btn" data-index="2">Mar</button>
+          <button class="month-btn" data-index="3">Abr</button>
+          <button class="month-btn" data-index="4">Mai</button>
+          <button class="month-btn" data-index="5">Jun</button>
+          <button class="month-btn" data-index="6">Jul</button>
+          <button class="month-btn" data-index="7">Ago</button>
+          <button class="month-btn" data-index="8">Set</button>
+          <button class="month-btn" data-index="9">Out</button>
+          <button class="month-btn" data-index="10">Nov</button>
+          <button class="month-btn" data-index="11">Dez</button>
+        </div>
+
+        <!-- Botões de controle -->
+        <div class="controls">
+          <button class="control-btn" onclick="selecionarTodos()">✅ Todos</button>
+          <button class="control-btn" onclick="selecionarDisponiveis()">🕓 Até agora</button>
+          <button class="control-btn" onclick="removerSelecao()">❌ Nenhum</button>
+        </div>
+      </div>
+
+      <!-- Alternância FOLHA / G5 -->
+      <div class="toggle-section">
+        <button class="toggle-btn" id="btnFolha" onclick="alternar('folha')"> FOLHA</button>
+        <button class="toggle-btn" id="btnG5" onclick="alternar('g5')"> G5</button>
+      </div>
+    </div>
+
+    <!-- Parte inferior atualizada -->
+    <div class="section">
+      <div class="bottom-row">
+        <div class="label">Selecionadas</div>
+        <button class="action-btn" id="btnOk" onclick="selecionarEstado('ok')">✔️</button>
+        <button class="action-btn" id="btnNo" onclick="selecionarEstado('no')">❌</button>
+        <input type="text" class="input-box" placeholder="Digite aqui...">
+        <button class="search-btn" onclick="abrirModal()">🔍</button>
+      </div>
+    </div>
+
+    <!-- Tabela de Empresas -->
+    <div class="section table-container">
+      <table>
+        <thead>
+          <tr>
+            <th>SELEÇÃO</th>
+            <th>APELIDO</th>
+            <th>RAZÃO</th>
+            <th>CNPJ</th>
+            <th>TRIB</th>
+            <th>SITUAÇÃO</th>
+          </tr>
+        </thead>
+        <tbody id="tabelaEmpresas">
+          <!-- Linhas dinâmicas virão aqui -->
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <div class="modal" id="janelaBusca">
+  <h2 style="margin-top: 0; font-size: 1.3rem;">🔍 Filtros avançados</h2>
+  <div style="margin-top: 1rem;">
+    <label><strong>Tributação:</strong></label><br>
+    <select id="filtroTrib" onchange="aplicarFiltros()" style="padding: 0.4rem; border-radius: 8px; margin-top: 0.4rem;">
+      <option value="">Todas</option>
+      <option value="Simples">Simples</option>
+      <option value="Lucro">Lucro</option>
+    </select>
+  </div>
+  <div style="margin-top: 1rem;">
+    <label><strong>Situação:</strong></label><br>
+    <select id="filtroSituacaoExtra" onchange="aplicarFiltros()" style="padding: 0.4rem; border-radius: 8px; margin-top: 0.4rem;">
+      <option value="">Todas</option>
+      <option value="feito">Feito</option>
+      <option value="quase feito">Quase Feito</option>
+      <option value="não feito">Não Feito</option>
+    </select>
+  </div>
+</div>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    <script>
+      const monthButtons = document.querySelectorAll('.month-btn');
+      const tabelaEmpresas = document.getElementById('tabelaEmpresas');
+      let dadosEmpresas = [];
+      let filtroSituacao = null;
+      let filtroTexto = '';
+      let filtroColuna = null;
+    
+      monthButtons.forEach(btn => {
+        btn.addEventListener('click', () => {
+          btn.classList.toggle('selected');
+        });
+      });
+    
+      function selecionarTodos() {
+        monthButtons.forEach(btn => btn.classList.add('selected'));
+      }
+    
+      function selecionarDisponiveis() {
+        const now = new Date();
+        const currentMonth = now.getMonth();
+        monthButtons.forEach((btn, index) => {
+          if (index < currentMonth) {
+            btn.classList.add('selected');
+          } else {
+            btn.classList.remove('selected');
+          }
+        });
+      }
+    
+      function removerSelecao() {
+        monthButtons.forEach(btn => btn.classList.remove('selected'));
+      }
+    
+      function alternar(tipo) {
+        const btn = document.getElementById(tipo === 'folha' ? 'btnFolha' : 'btnG5');
+        btn.classList.toggle('active');
+      }
+    
+      function selecionarEstado(tipo) {
+      const btnOk = document.getElementById('btnOk');
+      const btnNo = document.getElementById('btnNo');
+    
+      if (tipo === 'ok') {
+        const active = btnOk.classList.contains('active');
+        btnOk.classList.toggle('active', !active);
+        if (!active) btnNo.classList.remove('active');
+        filtroSituacao = !active ? 'ok' : null;
+      } else {
+        const active = btnNo.classList.contains('active');
+        btnNo.classList.toggle('active', !active);
+        if (!active) btnOk.classList.remove('active');
+        filtroSituacao = !active ? 'no' : null;
+      }
+
+      aplicarFiltros();
+    }
+
+    function abrirModal() {
+
+        const modal = document.getElementById('janelaBusca');
+        modal.classList.toggle('show');
+      }
+    
+      function aplicarFiltros() {
+  const trib = document.getElementById('filtroTrib')?.value;
+  const sit = document.getElementById('filtroSituacaoExtra')?.value;
+        let lista = [...dadosEmpresas];
+    
+        if (filtroSituacao === 'ok') {
+          lista = lista.filter(e => e.selecionado);
+        } else if (filtroSituacao === 'no') {
+          lista = lista.filter(e => !e.selecionado);
+        }
+    
+        if (filtroTexto.trim() !== '') {
+          const texto = filtroTexto.toLowerCase();
+          lista = lista.filter(e => {
+            if (filtroColuna === 'apelido') return e.apelido.toLowerCase().includes(texto);
+            if (filtroColuna === 'razao') return e.razao.toLowerCase().includes(texto);
+            if (filtroColuna === 'cnpj') return e.cnpj.toLowerCase().includes(texto);
+            return (
+              e.apelido.toLowerCase().includes(texto) ||
+              e.razao.toLowerCase().includes(texto) ||
+              e.cnpj.toLowerCase().includes(texto)
+            );
+          });
+        }
+    
+        if (trib === 'Simples') {
+    lista = lista.filter(e => e.trib === 'Simples');
+  } else if (trib === 'Lucro') {
+    lista = lista.filter(e => e.trib !== 'Simples');
+  }
+
+  if (sit) {
+    lista = lista.filter(e => (e.situacao || '').toLowerCase() === sit.toLowerCase());
+  }
+
+  renderizarTabela(lista);
+      }
+    
+      function renderizarTabela(lista) {
+        tabelaEmpresas.innerHTML = '';
+          lista.forEach(emp => {
+            const index = dadosEmpresas.findIndex(e => e.cnpj === emp.cnpj);
+            const row = document.createElement('tr');
+            row.innerHTML = `
+              <td><input type="checkbox" data-index="${index}" ${emp.selecionado ? 'checked' : ''}></td>
+              <td>${emp.apelido}</td>
+              <td>${emp.razao}</td>
+              <td>${emp.cnpj}</td>
+              <td>${emp.trib}</td>
+              <td></td>
+            `;
+            tabelaEmpresas.appendChild(row);
+          });
+
+
+    
+        document.querySelectorAll('input[type="checkbox"]').forEach(input => {
+          input.addEventListener('change', e => {
+            const i = parseInt(e.target.dataset.index);
+            dadosEmpresas[i].selecionado = e.target.checked;
+            aplicarFiltros();
+          });
+        });
+      }
+    
+      document.querySelector('.input-box').addEventListener('input', e => {
+      filtroTexto = e.target.value;
+      filtroColuna = null; // Busca ampla e dinâmica
+      aplicarFiltros();
+    });
+    
+      document.querySelectorAll('th').forEach(th => {
+        th.addEventListener('click', () => {
+          const texto = th.textContent.trim().toLowerCase();
+          if (texto === 'apelido') filtroColuna = 'apelido';
+          else if (texto === 'razão') filtroColuna = 'razao';
+          else if (texto === 'cnpj') filtroColuna = 'cnpj';
+          else filtroColuna = null;
+          aplicarFiltros();
+        });
+      });
+    
+      fetch('empresas.json')
+        .then(res => res.json())
+        .then(empresas => {
+          dadosEmpresas = empresas.map(e => ({ ...e, selecionado: false }));
+          aplicarFiltros();
+        });
+    </script>
+    
+
+
+
+
+
+
+
+
+    
+    
+
+
+
+    
+</body>
+</html>
